@@ -181,6 +181,14 @@ class ChargeService : Service() {
         } catch (e: Exception) {
         }
 
+        try {
+            startActivity(
+                Intent(this, AlarmActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
+            )
+        } catch (e: Exception) {
+        }
+
         val d = Cfg.duration(this)
         if (d > 0) handler.postDelayed(autoStop, d * 60_000L)
         updateStatus()
@@ -319,6 +327,14 @@ class ChargeService : Service() {
         )
     }
 
+    private fun alarmScreenIntent(): PendingIntent {
+        val i = Intent(this, AlarmActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION
+        return PendingIntent.getActivity(
+            this, 2, i, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     private fun buildStatusNotification(): Notification {
         val th = Cfg.threshold(this)
         val text = when {
@@ -353,8 +369,8 @@ class ChargeService : Service() {
             .setCategory(Notification.CATEGORY_ALARM)
             .setOngoing(true)
             .setAutoCancel(false)
-            .setContentIntent(openAppIntent())
-            .setFullScreenIntent(openAppIntent(), true)
+            .setContentIntent(alarmScreenIntent())
+            .setFullScreenIntent(alarmScreenIntent(), true)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "DURDUR", stop)
             .build()
     }

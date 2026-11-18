@@ -142,6 +142,36 @@ class MainActivity : FlutterActivity() {
                 result.success(null)
             }
 
+            "openAppSettings" -> {
+                startActivity(
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        .setData(Uri.parse("package:$packageName"))
+                )
+                result.success(null)
+            }
+
+            "openFullScreen" -> {
+                try {
+                    if (Build.VERSION.SDK_INT >= 34) {
+                        startActivity(
+                            Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+                                .setData(Uri.parse("package:$packageName"))
+                        )
+                    } else {
+                        startActivity(
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                .setData(Uri.parse("package:$packageName"))
+                        )
+                    }
+                } catch (e: Exception) {
+                    startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            .setData(Uri.parse("package:$packageName"))
+                    )
+                }
+                result.success(null)
+            }
+
             else -> result.notImplemented()
         }
     }
@@ -171,6 +201,7 @@ class MainActivity : FlutterActivity() {
             "running" to (ChargeService.instance != null),
             "notifOk" to nm.areNotificationsEnabled(),
             "exempt" to pm.isIgnoringBatteryOptimizations(packageName),
+            "fullScreen" to (Build.VERSION.SDK_INT < 34 || nm.canUseFullScreenIntent()),
             "maker" to Build.MANUFACTURER.lowercase()
         )
     }

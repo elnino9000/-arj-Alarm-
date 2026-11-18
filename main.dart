@@ -75,6 +75,7 @@ class St {
   bool running = false;
   bool notifOk = true;
   bool exempt = false;
+  bool fullScreen = true;
   String maker = '';
 
   void apply(Map<String, dynamic> m, {bool keepSliders = false}) {
@@ -92,6 +93,7 @@ class St {
     running = (m['running'] as bool?) ?? running;
     notifOk = (m['notifOk'] as bool?) ?? notifOk;
     exempt = (m['exempt'] as bool?) ?? exempt;
+    fullScreen = (m['fullScreen'] as bool?) ?? fullScreen;
     maker = (m['maker'] as String?) ?? maker;
   }
 }
@@ -531,6 +533,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               () => _call('requestNotif')),
           _checkRow('Pil kısıtlaması yok', s.exempt, 'Kaldır',
               () => _call('requestBattery')),
+          _checkRow('Kilit ekranında alarm ekranı', s.fullScreen, 'İzin ver',
+              () => _call('openFullScreen')),
           _checkRow(
               xiaomi ? 'Otomatik başlatma (Xiaomi)' : 'Arka planda çalışma',
               null,
@@ -540,7 +544,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             const Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
-                  'Xiaomi: "Otomatik başlatma"yı açın. Ayrıca Son uygulamalar ekranında bu uygulamanın kartını basılı tutup kilitleyin; pil tasarrufunu "Kısıtlama yok" yapın.',
+                  'Xiaomi: "Otomatik başlatma"yı açın. Uygulama bilgisi > Diğer izinler bölümünde "Kilit ekranında göster" ve "Arka planda açılan pencereleri göster" izinlerini de açın. Ayrıca Son uygulamalar ekranında bu uygulamanın kartını basılı tutup kilitleyin; pil tasarrufunu "Kısıtlama yok" yapın.',
                   style: TextStyle(color: kMuted, fontSize: 12)),
             ),
         ],
