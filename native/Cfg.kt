@@ -13,6 +13,7 @@ object Cfg {
     fun vibrate(c: Context) = sp(c).getBoolean("vibrate", true)
     fun duration(c: Context) = sp(c).getInt("duration", 3)
     fun stopOnUnplug(c: Context) = sp(c).getBoolean("stopOnUnplug", true)
+    fun autoSaver(c: Context) = sp(c).getBoolean("autoSaver", true)
     fun rang(c: Context) = sp(c).getBoolean("rang", false)
     fun wasPlugged(c: Context) = sp(c).getBoolean("wasPlugged", false)
     fun notifAsked(c: Context) = sp(c).getBoolean("notifAsked", false)

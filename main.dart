@@ -76,6 +76,8 @@ class St {
   bool notifOk = true;
   bool exempt = false;
   bool fullScreen = true;
+  bool autoSaver = true;
+  bool canSecure = false;
   String maker = '';
 
   void apply(Map<String, dynamic> m, {bool keepSliders = false}) {
@@ -94,6 +96,8 @@ class St {
     notifOk = (m['notifOk'] as bool?) ?? notifOk;
     exempt = (m['exempt'] as bool?) ?? exempt;
     fullScreen = (m['fullScreen'] as bool?) ?? fullScreen;
+    autoSaver = (m['autoSaver'] as bool?) ?? autoSaver;
+    canSecure = (m['canSecure'] as bool?) ?? canSecure;
     maker = (m['maker'] as String?) ?? maker;
   }
 }
@@ -493,6 +497,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               _set('stopOnUnplug', v);
             },
           ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Şarj takınca pil tasarrufunu kapat'),
+            subtitle: s.canSecure
+                ? null
+                : const Text(
+                    'İzin eksik: bu özellik için telefona tek seferlik bir izin verilmesi gerekiyor.',
+                    style: TextStyle(color: kAmber, fontSize: 12)),
+            value: s.autoSaver,
+            onChanged: (v) {
+              setState(() => s.autoSaver = v);
+              _set('autoSaver', v);
+            },
+          ),
           const SizedBox(height: 6),
           SizedBox(
             width: double.infinity,
@@ -529,6 +547,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               'Telefonlar arka plandaki uygulamaları kapatabilir. Aşağıdakilerin hepsini bir kez ayarlamanız yeterli.',
               style: TextStyle(color: kMuted, fontSize: 12)),
           const SizedBox(height: 10),
+          _checkRow('Durum bildirimini gizle', null, 'Gizle',
+              () => _call('openChannel')),
           _checkRow('Bildirim izni', s.notifOk, 'İzin ver',
               () => _call('requestNotif')),
           _checkRow('Pil kısıtlaması yok', s.exempt, 'Kaldır',

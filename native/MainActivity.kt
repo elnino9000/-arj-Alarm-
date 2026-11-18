@@ -142,6 +142,22 @@ class MainActivity : FlutterActivity() {
                 result.success(null)
             }
 
+            "openChannel" -> {
+                try {
+                    startActivity(
+                        Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                            .putExtra(Settings.EXTRA_CHANNEL_ID, "durum2")
+                    )
+                } catch (e: Exception) {
+                    startActivity(
+                        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    )
+                }
+                result.success(null)
+            }
+
             "openAppSettings" -> {
                 startActivity(
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -202,6 +218,8 @@ class MainActivity : FlutterActivity() {
             "notifOk" to nm.areNotificationsEnabled(),
             "exempt" to pm.isIgnoringBatteryOptimizations(packageName),
             "fullScreen" to (Build.VERSION.SDK_INT < 34 || nm.canUseFullScreenIntent()),
+            "autoSaver" to Cfg.autoSaver(this),
+            "canSecure" to (checkSelfPermission("android.permission.WRITE_SECURE_SETTINGS") == PackageManager.PERMISSION_GRANTED),
             "maker" to Build.MANUFACTURER.lowercase()
         )
     }

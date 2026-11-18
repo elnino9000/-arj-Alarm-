@@ -24,6 +24,7 @@ import android.os.PowerManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
 
 /**
  * Sürekli çalışan ön plan servisi. Pil değişimlerini dinler,
@@ -34,7 +35,7 @@ class ChargeService : Service() {
     companion object {
         const val ACTION_PREVIEW = "com.sarjalarmi.PREVIEW"
         const val ACTION_STOP_ALARM = "com.sarjalarmi.STOP_ALARM"
-        private const val CH_STATUS = "durum"
+        private const val CH_STATUS = "durum2"
         private const val CH_ALARM = "alarm"
         private const val ID_STATUS = 1
         private const val ID_ALARM = 2
@@ -134,6 +135,7 @@ class ChargeService : Service() {
         if (plug != was) {
             Cfg.putBool(this, "wasPlugged", plug)
             if (plug) {
+                disableBatterySaver()
                 // Şarj yeni takıldı. Zaten eşiğin üstündeyse hemen çalma.
                 Cfg.putBool(this, "rang", pct >= th)
             } else {
@@ -148,6 +150,18 @@ class ChargeService : Service() {
             startAlarm()
         }
         updateStatus()
+    }
+
+    private fun disableBatterySaver() {
+        if (!Cfg.autoSaver(this)) return
+        try {
+            Settings.Global.putInt(contentResolver, "low_power", 0)
+        } catch (e: Exception) {
+        }
+        try {
+            Settings.Global.putInt(contentResolver, "low_power_sticky", 0)
+        } catch (e: Exception) {
+        }
     }
 
     // ---------------------------------------------------------------- alarm
@@ -308,7 +322,11 @@ class ChargeService : Service() {
 
     private fun createChannels() {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val status = NotificationChannel(CH_STATUS, "Şarj alarmı durumu", NotificationManager.IMPORTANCE_LOW)
+        try {
+            nm.deleteNotificationChannel("durum")
+        } catch (e: Exception) {
+        }
+        val status = NotificationChannel(CH_STATUS, "Arka plan çalışma bildirimi", NotificationManager.IMPORTANCE_MIN)
         status.setShowBadge(false)
         nm.createNotificationChannel(status)
 
@@ -336,22 +354,16 @@ class ChargeService : Service() {
     }
 
     private fun buildStatusNotification(): Notification {
-        val th = Cfg.threshold(this)
-        val text = when {
-            isRinging -> "Alarm çalıyor"
-            lastLevel < 0 -> "%$th'e ulaşınca çalacak"
-            lastPlugged -> "Şarj oluyor · %$lastLevel · %$th'de çalacak"
-            else -> "%$lastLevel · şarja takınca %$th'de çalacak"
-        }
-        return Notification.Builder(this, CH_STATUS)
+        val b = Notification.Builder(this, CH_STATUS)
             .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
-            .setContentTitle("Şarj Alarmı açık")
-            .setContentText(text)
+            .setContentTitle("Şarj Alarmı")
+            .setContentText(if (isRinging) "Alarm çalıyor" else "Arka planda çalışıyor")
+            .setVisibility(Notification.VISIBILITY_SECRET)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
             .setContentIntent(openAppIntent())
-            .build()
+        return b.build()
     }
 
     @Suppress("DEPRECATION")
